@@ -1,0 +1,27 @@
+const check = (ok, label) => { if (!ok) throw new Error(label); };
+renderHTML(html);
+check(document.querySelector('h1')?.textContent === 'Heading', 'heading');
+check(document.querySelector('strong')?.textContent === 'bold', 'bold');
+check(document.querySelector('em')?.textContent === 'italic', 'italic');
+check(document.querySelector('table td')?.textContent === '1', 'table');
+check(document.querySelector('input[type=checkbox]')?.checked, 'task list');
+check(document.querySelector('pre code')?.textContent.includes('let a = 1'), 'Rust fence');
+check(!document.querySelector('main script') && !window.compromised, 'scripts stripped');
+check(!document.querySelector('[onerror]'), 'event handlers stripped');
+check(!document.querySelector('a[href^="javascript:"]'), 'script URL stripped');
+check(!document.querySelector('img[src^="https:"]'), 'remote image blocked');
+check(document.querySelector('a[href="peek-asset://local/other.md"]'), 'relative link');
+check(document.querySelector('h2:nth-of-type(2)')?.id === 'same-1', 'unique anchors');
+check(document.querySelector('main').textContent.includes('café 🌍'), 'Unicode');
+check(!Array.from(document.querySelectorAll('a')).find(a => a.textContent === 'Malformed')?.hasAttribute('href'), 'malformed URL');
+const image = document.querySelector('img[alt="Local"]');
+check(image?.src === 'peek-asset://local/image.svg', 'local image URL');
+await new Promise((resolve, reject) => {
+  if (image.complete && image.naturalWidth) return resolve();
+  image.onload = resolve;
+  image.onerror = () => reject(new Error('Native scoped image handler failed'));
+  setTimeout(() => reject(new Error('Local image loading timed out')), 3000);
+});
+check(image.naturalWidth === 8, 'local image bytes');
+document.querySelector('a[href="#same"]').click();
+return true;
